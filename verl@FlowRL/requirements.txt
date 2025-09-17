@@ -1,24 +1,37 @@
-# requirements.txt records the full set of dependencies for development
+# Core VERL dependencies (matches setup.py install_requires)
 accelerate
 codetiming
 datasets
 dill
-flash-attn
 hydra-core
-liger-kernel
 numpy
 pandas
 peft
 pyarrow>=19.0.0
 pybind11
 pylatexenc
-pre-commit
-ray[default]
-tensordict<=0.6.2
+ray[default]>=2.41.0
 torchdata
+tensordict<=0.6.2
 transformers
-# vllm==0.8.4
 wandb
 packaging>=20.0
+
+# Development and testing dependencies
+pre-commit
+pytest
+py-spy
+
+# GPU acceleration (optional)
+liger-kernel
+flash-attn
+
+# Math verification (for FlowRL math training)
+math-verify
+
+# Web serving (for API endpoints)
 uvicorn
 fastapi
+
+# VLLM support (optional, uncomment if needed)
+# vllm<=0.8.5
