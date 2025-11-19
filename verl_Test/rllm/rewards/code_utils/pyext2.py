@@ -114,6 +114,31 @@ else:
 def _gettypes(args):
     return tuple(map(type, args))
 
+# Python 3.11+ removed ``inspect.getargspec``; provide a thin
+# compatibility wrapper using ``inspect.getfullargspec`` so the
+# rest of this module continues to work unchanged.
+if not hasattr(inspect, 'getargspec'):
+    try:
+        from collections import namedtuple
+    except ImportError:
+        # collections.namedtuple has existed since Python 2.6; this
+        # branch is defensive and should never be hit in practice.
+        def namedtuple(*_args, **_kwargs):  # type: ignore[no-redef]
+            raise RuntimeError('namedtuple is required for getargspec shim')
+
+    ArgSpec = namedtuple('ArgSpec', 'args varargs keywords defaults')
+
+    def _shim_getargspec(func):
+        fas = inspect.getfullargspec(func)
+        return ArgSpec(
+            args=fas.args,
+            varargs=fas.varargs,
+            keywords=fas.varkw,
+            defaults=fas.defaults,
+        )
+
+    inspect.getargspec = _shim_getargspec
+
 oargspec = inspect.getargspec
 
 def _argspec(func):
@@ -479,4 +504,3 @@ def compare_and_swap(var, compare, new):
     "If `var` is equal to `compare`, set it to `new`."
     if assign('v', inspect.stack()[1][0].f_globals)[var] == compare:
         v[var] = new
-
