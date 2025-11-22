@@ -64,6 +64,14 @@ class DataParallelPPOActor(BasePPOActor):
 
         self.ulysses_sequence_parallel_size = self.config.ulysses_sequence_parallel_size
         self.use_ulysses_sp = self.ulysses_sequence_parallel_size > 1
+        self.flowrl_beta_coef = getattr(self.config, "flowrl_beta_coef", 15.0)
+        alpha_cfg = getattr(self.config, "alphagfn_alpha", None)
+        if isinstance(alpha_cfg, str):
+            try:
+                alpha_cfg = float(alpha_cfg)
+            except ValueError:
+                pass
+        self.alphagfn_alpha = alpha_cfg
 
         self.compute_entropy_from_logits = (
             torch.compile(verl_F.entropy_from_logits, dynamic=True)
