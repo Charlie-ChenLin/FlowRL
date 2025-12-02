@@ -32,7 +32,7 @@ python3 -m verl.trainer.main_ppo \
     data.max_response_length=$max_response_length \
     data.truncation='left' \
     +actor_rollout_ref.actor.tb_type=tempered_important_sampling \
-    +actor_rollout_ref.actor.porj_layer=3 \
+    +actor_rollout_ref.actor.proj_layer=3 \
     actor_rollout_ref.model.path=$PRETRAINED_MODEL \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.actor.optim.lr_warmup_steps=10 \

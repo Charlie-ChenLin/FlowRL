@@ -286,7 +286,7 @@ class ActorRolloutRefWorker(Worker):
             with torch.random.fork_rng(devices=None):
                 torch.manual_seed(log_z_init_seed)
                 # actor_module.proj_z = torch.nn.Linear(n_dim, 1)
-                actor_module.proj_z = ProjZModule(n_dim, num_layers=self.config.actor.porj_layer)
+                actor_module.proj_z = ProjZModule(n_dim, num_layers=self.config.actor.proj_layer)
 
             # Apply Liger kernel to the model if use_liger is set to True
             if use_liger:

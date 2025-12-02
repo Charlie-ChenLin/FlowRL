@@ -33,7 +33,7 @@ class ProjZModule(torch.nn.Module):
 
 ```python
 n_dim = actor_module.config.hidden_size  
-actor_module.proj_z = ProjZModule(n_dim, num_layers=self.config.actor.porj_layer)
+actor_module.proj_z = ProjZModule(n_dim, num_layers=self.config.actor.proj_layer)
 ```
 
 ### Step 2: Modify Forward Pass
