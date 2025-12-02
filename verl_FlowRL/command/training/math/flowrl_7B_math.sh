@@ -12,6 +12,8 @@ n_nodes=1
 n_gpus_per_node=8
 tensor_model_parallel_size=1
 save_freq=50
+train_batch_size=512
+gen_batch_size=$((train_batch_size * 3))
 
 dapo_train_path="/mnt/shared-storage-user/chenlin1/verl/downloads/data/dapo-math-17k.parquet"
 r1_test_path="/mnt/shared-storage-user/chenlin1/verl/downloads/data/aime-2024.parquet"
@@ -28,7 +30,8 @@ python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
     data.train_files=$dapo_train_path \
     data.val_files=$r1_test_path \
-    data.train_batch_size=512 \
+    data.train_batch_size=$train_batch_size \
+    data.gen_batch_size=$gen_batch_size \
     data.max_prompt_length=$max_prompt_length \
     data.max_response_length=$max_response_length \
     data.truncation='left' \
