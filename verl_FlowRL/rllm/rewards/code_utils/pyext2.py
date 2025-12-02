@@ -125,12 +125,17 @@ try:
     import IPython
 except ImportError:
     IPython = None
+    _ipy_getargspec = None
 else:
-    # Replace IPython's argspec
-    oipyargspec = IPython.core.oinspect.getargspec
-    def _ipyargspec(func):
-        return __targspec(func, oipyargspec, '__orig_arg_ipy__')
-    IPython.core.oinspect.getargspec = _ipyargspec
+    # Replace IPython's argspec (IPython >=8 removed oinspect.getargspec)
+    _ipy_getargspec = getattr(getattr(IPython, "core", None), "oinspect", None)
+    if _ipy_getargspec is not None and hasattr(_ipy_getargspec, "getargspec"):
+        oipyargspec = _ipy_getargspec.getargspec
+        def _ipyargspec(func):
+            return __targspec(func, oipyargspec, '__orig_arg_ipy__')
+        IPython.core.oinspect.getargspec = _ipyargspec
+    else:
+        _ipy_getargspec = None
 
 class overload(object):
     '''Simple function overloading in Python.'''
@@ -176,7 +181,7 @@ class overload(object):
             _newf.__doc__ = f.__doc__
             _newf.__is_overload__ = True
             _newf.__orig_arg__ = argspec(f)
-            if IPython:
+            if _ipy_getargspec is not None:
                 _newf.__orig_arg_ipy__ = IPython.core.oinspect.getargspec(f)
             return _newf
         return _wrap
@@ -231,7 +236,7 @@ class overload(object):
             _newf.__doc__ = f.__doc__
             _newf.__is_overload__ = True
             _newf.__orig_arg__ = argspec(f)
-            if IPython:
+            if _ipy_getargspec is not None:
                 _newf.__orig_arg_ipy__ = IPython.core.oinspect.getargspec(f)
             return _newf
         return _wrap
@@ -479,4 +484,3 @@ def compare_and_swap(var, compare, new):
     "If `var` is equal to `compare`, set it to `new`."
     if assign('v', inspect.stack()[1][0].f_globals)[var] == compare:
         v[var] = new
-
