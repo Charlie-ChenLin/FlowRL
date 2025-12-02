@@ -5,6 +5,7 @@ export WANDB_MODE='offline'
 export WANDB_DIR='/mnt/shared-storage-user/chenlin1/verl_FlowRL_dev/wandb'
 export VLLM_USE_FLASHINFER=1
 export HYDRA_FULL_ERROR=1
+export VERL_LOGGING_LEVEL=INFO
 
 PRETRAINED_MODEL='/mnt/shared-storage-user/chenlin1/models/Qwen/Qwen2.5-7B'
 n_nodes=1
