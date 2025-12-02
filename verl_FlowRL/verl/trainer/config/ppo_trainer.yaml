@@ -13,6 +13,7 @@ data:
   return_raw_chat: False
   return_full_prompt: False
   shuffle: True
+  seed: 1
   filter_overlong_prompts: False # for large-scale dataset, filtering overlong prompts could be timeconsuming. You cat set the filter_overlong_prompts_workers to use multiprocessing to speed up.
   filter_overlong_prompts_workers: 1
   truncation: error
@@ -45,6 +46,7 @@ actor_rollout_ref:
     ppo_micro_batch_size: null # will be deprecated, use ppo_micro_batch_size_per_gpu
     ppo_micro_batch_size_per_gpu: null
     use_dynamic_bsz: False
+    log_z_init_seed: ${data.seed}
     ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
     grad_clip: 1.0
     # pg_losses2 = -advantages * torch.clamp(ratio, 1 - cliprange_low, 1 + cliprange_high)

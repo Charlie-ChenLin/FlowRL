@@ -188,6 +188,23 @@ class ActorRolloutRefWorker(Worker):
             self.config.ref.log_prob_micro_batch_size //= self.device_mesh.size() // self.ulysses_sequence_parallel_size
             self.config.ref.log_prob_micro_batch_size_per_gpu = self.config.ref.log_prob_micro_batch_size
 
+    def _resolve_log_z_init_seed(self) -> int:
+        seed = None
+        actor_cfg = getattr(self.config, "actor", None)
+        if actor_cfg is not None:
+            if hasattr(actor_cfg, "get"):
+                seed = actor_cfg.get("log_z_init_seed", None)
+            else:
+                seed = getattr(actor_cfg, "log_z_init_seed", None)
+
+        if seed is None:
+            seed = 1
+
+        try:
+            return int(seed)
+        except (TypeError, ValueError) as e:
+            raise ValueError(f"Invalid log_z_init_seed value: {seed}") from e
+
     def _build_model_optimizer(
         self,
         model_path,
@@ -263,8 +280,13 @@ class ActorRolloutRefWorker(Worker):
             )
 
             n_dim = actor_module.config.hidden_size  
-            # actor_module.proj_z = torch.nn.Linear(n_dim, 1)
-            actor_module.proj_z = ProjZModule(n_dim, num_layers=self.config.actor.porj_layer)
+            log_z_init_seed = self._resolve_log_z_init_seed()
+            if self.rank == 0:
+                logger.info(f"Initializing proj_z with seed {log_z_init_seed}")
+            with torch.random.fork_rng(devices=None):
+                torch.manual_seed(log_z_init_seed)
+                # actor_module.proj_z = torch.nn.Linear(n_dim, 1)
+                actor_module.proj_z = ProjZModule(n_dim, num_layers=self.config.actor.porj_layer)
 
             # Apply Liger kernel to the model if use_liger is set to True
             if use_liger:
