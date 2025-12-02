@@ -1,18 +1,25 @@
 #!/bin/bash
 
-PRETRAINED_MODEL=../pre_trained_model/Qwen/Qwen2.5-7B
+export WANDB_MODE='offline'
+# export WANDB_RESUME='must'
+export WANDB_DIR='/mnt/shared-storage-user/chenlin1/verl_FlowRL_dev/wandb'
+export VLLM_USE_FLASHINFER=1
+export HYDRA_FULL_ERROR=1
+
+PRETRAINED_MODEL='/mnt/shared-storage-user/chenlin1/models/Qwen/Qwen2.5-7B'
 n_nodes=1
 n_gpus_per_node=8
 tensor_model_parallel_size=1
 save_freq=50
 
-dapo_train_path=../data/math_data/dapo-math-17k.parquet
-r1_test_path=../data/math_data/validation.parquet
+dapo_train_path="/mnt/shared-storage-user/chenlin1/verl/downloads/data/dapo-math-17k.parquet"
+r1_test_path="/mnt/shared-storage-user/chenlin1/verl/downloads/data/aime-2024.parquet"
 
-experiment_name="flowrl_qwen_7b_math"
+project_name="FlowRL"
+experiment_name="FlowRL-old-Qwen2.5-7B-$(date +'%Y%m%d-%H%M')"
 max_prompt_length=2048
 max_response_length=8192
-OUTPUT_DIR=/mnt/petrelfs/linzhouhan/xuekaizhu/dev/FlowRL/checkpoints/FlowRL/math/7B/$experiment_name
+OUTPUT_DIR="/mnt/petrelfs/linzhouhan/xuekaizhu/dev/FlowRL/checkpoints/FlowRL/math/7B/$experiment_name"
 
 set -x
 
@@ -46,13 +53,13 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.fsdp_config.param_offload=False \
     actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
     actor_rollout_ref.rollout.tensor_model_parallel_size=$tensor_model_parallel_size \
-    actor_rollout_ref.rollout.gpu_memory_utilization=0.6 \
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.8 \
     actor_rollout_ref.rollout.n=8 \
     actor_rollout_ref.ref.fsdp_config.param_offload=False \
     algorithm.use_kl_in_reward=False \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
-    trainer.project_name='FlowRL' \
+    trainer.project_name=$project_name \
     trainer.experiment_name=$experiment_name \
     trainer.n_gpus_per_node=$n_gpus_per_node \
     trainer.nnodes=$n_nodes \
