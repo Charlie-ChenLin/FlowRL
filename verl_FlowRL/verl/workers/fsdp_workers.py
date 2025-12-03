@@ -287,6 +287,10 @@ class ActorRolloutRefWorker(Worker):
                 torch.manual_seed(log_z_init_seed)
                 # actor_module.proj_z = torch.nn.Linear(n_dim, 1)
                 actor_module.proj_z = ProjZModule(n_dim, num_layers=self.config.actor.proj_layer)
+                if self.rank == 0:
+                    import hashlib
+                    vec = torch.nn.utils.parameters_to_vector(actor_module.proj_z.parameters()).detach().cpu().numpy().tobytes()
+                    logger.info(f"proj_z sha256={hashlib.sha256(vec).hexdigest()}")
 
             # Apply Liger kernel to the model if use_liger is set to True
             if use_liger:
